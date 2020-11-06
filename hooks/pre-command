@@ -76,6 +76,6 @@ else
     fi
   done
 
-  rm -f ${filename}
+  rm -f "${filename}"
   rm -rf cache
 fi
