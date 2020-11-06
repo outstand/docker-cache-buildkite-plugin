@@ -20,3 +20,4 @@ steps:
 
       - https://github.com/outstand/docker-compose-buildkite-plugin.git#45517eea7ac209607bf32a26494bb5854c0a743c:
           run: tests
+          propagate-uid-gid: true
