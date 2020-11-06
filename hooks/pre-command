@@ -43,7 +43,7 @@ else
   aws s3 cp "s3://${s3_bucket}/${s3_key}" .
 
   mkdir -p "${cache_dir}"
-  tar -xf ${filename} -C "${cache_dir}"
+  tar -xf "${filename}" -C "${cache_dir}"
 
   while IFS=$'\n' read -r volume ; do
     [[ -n "${volume:-}" ]] && volumes+=("$volume")
@@ -63,13 +63,14 @@ else
 
   for volume in "${volumes[@]}" ; do
     if [[ -f "cache/${volume}.tar" ]] ; then
-      cat "cache/${volume}.tar" | docker-compose \
+      docker-compose \
         "${compose_files[@]}" \
         -p "${project_name}" \
         run \
         --rm \
         docker-cache-buildkite-plugin \
-        tar -xf - -C /volumes/"${volume}" --strip-components=1
+        tar -xf - -C /volumes/"${volume}" --strip-components=1 \
+        < "cache/${volume}.tar"
     else
       echo "+++ :warning: Missing volume ${volume} for restore!"
     fi

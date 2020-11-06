@@ -117,8 +117,6 @@ function build_volume_override_file_with_version() {
   printf "    image: alpine:latest\\n"
   printf "    volumes:\\n"
 
-  IFS=$'\n' read -r -a volumes <<< "$@"
-
   while test ${#} -gt 0 ; do
     printf "      - %s:/volumes/%s\\n" "$1" "$1"
     shift
