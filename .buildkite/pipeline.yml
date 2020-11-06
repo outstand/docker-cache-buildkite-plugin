@@ -10,7 +10,7 @@ steps:
   - label: ":sparkles: Lint"
     plugins:
       plugin-linter#v2.0.0:
-        id: docker-compose
+        id: docker-cache
 
   - label: ":bash: Tests"
     plugins:
