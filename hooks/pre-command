@@ -1,0 +1,79 @@
+#!/bin/bash
+
+set -euo pipefail
+
+BASEDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && cd .. && pwd)"
+
+# shellcheck source=lib/shared.bash
+. "$BASEDIR/lib/shared.bash"
+
+expand_headers_on_error() {
+  echo "^^^ +++"
+}
+trap expand_headers_on_error ERR
+
+if [[ "$(plugin_read_config DEBUG "false")" =~ ^(true|on|1)$ ]]; then
+  set -x
+fi
+
+echo "--- :bank: Restoring Docker Cache"
+
+keys=()
+volumes=()
+s3_bucket="$(plugin_read_config S3_BUCKET)"
+bucket_path="${BUILDKITE_ORGANIZATION_SLUG}/${BUILDKITE_PIPELINE_SLUG}"
+cache_dir=cache
+override_file="docker-compose.cache-volumes.buildkite-${BUILDKITE_BUILD_NUMBER}-override.yml"
+
+while IFS=$'\n' read -r key ; do
+  [[ -n "${key:-}" ]] && keys+=("$(expand_key "$key")")
+done <<< "$(plugin_read_list KEYS)"
+
+echo "Using cache key: ${keys[0]}"
+
+s3_key="${bucket_path}/${keys[0]}.tar"
+filename="${keys[0]}.tar"
+
+aws s3api head-object --bucket "${s3_bucket}" --key "${s3_key}" || no_head=true
+
+if ${no_head:-false}; then
+  cache_restore_skip "s3://${s3_bucket}/${s3_key}"
+else
+  cache_hit "s3://${s3_bucket}/${s3_key}"
+  aws s3 cp "s3://${s3_bucket}/${s3_key}" .
+
+  mkdir -p "${cache_dir}"
+  tar -xf ${filename} -C "${cache_dir}"
+
+  while IFS=$'\n' read -r volume ; do
+    [[ -n "${volume:-}" ]] && volumes+=("$volume")
+  done <<< "$(plugin_read_list VOLUMES)"
+
+  test -f "$override_file" && rm "$override_file"
+  echo "~~~ :docker: Creating docker-compose override file for volumes"
+  build_volume_override_file "${volumes[@]}" | tee "$override_file"
+
+  compose_files=()
+  while IFS=$' ' read -r file ; do
+    [[ -n "${file:-}" ]] && compose_files+=(-f "$file")
+  done <<< "$(buildkite-agent meta-data get docker-compose-config-files)"
+  compose_files+=(-f "${override_file}")
+
+  project_name="$(buildkite-agent meta-data get docker-compose-project-name)"
+
+  for volume in "${volumes[@]}" ; do
+    if [[ -f "cache/${volume}.tar" ]] ; then
+      cat "cache/${volume}.tar" | docker-compose \
+        "${compose_files[@]}" \
+        -p "${project_name}" \
+        run \
+        --rm \
+        docker-cache-buildkite-plugin \
+        tar -xf - -C /volumes/"${volume}" --strip-components=1
+    else
+      echo "+++ :warning: Missing volume ${volume} for restore!"
+    fi
+  done
+
+  rm -f ${filename}
+fi

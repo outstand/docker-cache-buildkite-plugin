@@ -1,0 +1,25 @@
+#!/bin/bash
+
+set -euo pipefail
+
+BASEDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && cd .. && pwd)"
+
+# shellcheck source=lib/shared.bash
+. "$BASEDIR/lib/shared.bash"
+
+expand_headers_on_error() {
+  echo "^^^ +++"
+}
+trap expand_headers_on_error ERR
+
+if [[ "$(plugin_read_config DEBUG "false")" =~ ^(true|on|1)$ ]]; then
+  set -x
+fi
+
+if [[ "$(plugin_read_config SAVE "false")" =~ ^(false|off|0)$ ]]; then
+  exit 0
+fi
+
+echo "--- :bank: Saving Docker Cache"
+
+

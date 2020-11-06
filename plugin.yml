@@ -1,0 +1,24 @@
+name: Docker Cache
+description: Cache/Restore the contents of docker volumes
+author: https://github.com/outstand
+requirements:
+  - docker
+  - docker-compose
+  - aws
+configuration:
+  properties:
+    keys:
+      type: [string, array]
+      minimum: 1
+    s3_bucket:
+      type: string
+    save:
+      type: boolean
+    volumes:
+      type: [string, array]
+      minimum: 1
+  required:
+    - keys
+    - s3_bucket
+    - volumes
+  additionalProperties: false
