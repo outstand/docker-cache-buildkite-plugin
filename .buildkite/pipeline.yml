@@ -19,4 +19,4 @@ steps:
           region: "us-east-1"
 
       - docker-compose#v3.7.0:
-        run: tests
+          run: tests
