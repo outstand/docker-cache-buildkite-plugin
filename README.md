@@ -31,8 +31,8 @@ steps:
           volumes:
             - bundler-data
 
-      - docker-compose#v3.7.0:
-          run: app
+      # - docker-compose#v3.7.0:
+      #     run: app
 
   - command: rspec spec
     plugins:
@@ -44,6 +44,6 @@ steps:
           volumes:
             - bundler-data
 
-      - docker-compose#v3.7.0:
-          run: app
+      # - docker-compose#v3.7.0:
+      #     run: app
 ```
