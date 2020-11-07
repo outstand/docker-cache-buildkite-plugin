@@ -59,8 +59,29 @@ teardown() {
   assert_success
   assert_output --partial "Cache hit"
   assert_output --partial "Copied from S3"
-  assert_output asdfasdf
 
   unstub buildkite-agent
   unstub aws
+
+  run docker-compose \
+    -f tests/fixtures/docker-compose.yml \
+    -f docker-compose.cache-volumes.buildkite-1-override.yml \
+    -p buildkite1111 \
+    run --rm \
+    -w /volumes/bundler-data \
+    docker-cache-buildkite-plugin \
+    ls
+
+  assert_output --partial bundler.txt
+
+  run docker-compose \
+    -f tests/fixtures/docker-compose.yml \
+    -f docker-compose.cache-volumes.buildkite-1-override.yml \
+    -p buildkite1111 \
+    run --rm \
+    -w /volumes/yarn-data \
+    docker-cache-buildkite-plugin \
+    ls
+
+  assert_output --partial yarn.txt
 }
