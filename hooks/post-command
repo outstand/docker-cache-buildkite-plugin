@@ -22,4 +22,61 @@ fi
 
 echo "--- :bank: Saving Docker Cache"
 
+keys=()
+volumes=()
+s3_bucket="$(plugin_read_config S3_BUCKET)"
+bucket_path="${BUILDKITE_ORGANIZATION_SLUG}/${BUILDKITE_PIPELINE_SLUG}"
+cache_dir=cache
+override_file="docker-compose.cache-volumes.buildkite-${BUILDKITE_BUILD_NUMBER}-override.yml"
 
+while IFS=$'\n' read -r key ; do
+  [[ -n "${key:-}" ]] && keys+=("$(expand_key "$key")")
+done <<< "$(plugin_read_list KEYS)"
+
+echo "Using cache key: ${keys[0]}"
+
+s3_key="${bucket_path}/${keys[0]}.tar"
+filename="${keys[0]}.tar"
+
+aws s3api head-object --bucket "${s3_bucket}" --key "${s3_key}" || no_head=true
+
+if ${no_head:-false}; then
+  cache_save "s3://${s3_bucket}/${s3_key}"
+
+  while IFS=$'\n' read -r volume ; do
+    [[ -n "${volume:-}" ]] && volumes+=("$volume")
+  done <<< "$(plugin_read_list VOLUMES)"
+
+  test -f "$override_file" && rm "$override_file"
+  echo "~~~ :docker: Creating docker-compose override file for volumes"
+  build_volume_override_file "${volumes[@]}" | tee "$override_file"
+
+  compose_files=()
+  while IFS=$' ' read -r file ; do
+    [[ -n "${file:-}" ]] && compose_files+=(-f "$file")
+  done <<< "$(buildkite-agent meta-data get docker-compose-config-files)"
+  compose_files+=(-f "${override_file}")
+
+  project_name="$(buildkite-agent meta-data get docker-compose-project-name)"
+
+  mkdir -p "${cache_dir}"
+
+  for volume in "${volumes[@]}" ; do
+    plugin_prompt_and_must_run docker-compose \
+      "${compose_files[@]}" \
+      -p "${project_name}" \
+      run \
+      --rm \
+      docker-cache-buildkite-plugin \
+      tar -cf - -C /volumes/"${volume}" \
+      > "cache/${volume}.tar"
+  done
+
+  tar -cf "${filename}" -C "${cache_dir}" "${volumes[@]}"
+  aws s3 cp "cache/${filename}" "s3://${s3_bucket}/${s3_key}"
+
+  rm -f "${filename}"
+  rm -rf "${cache_dir}"
+else
+  cache_save_skip "s3://${s3_bucket}/${s3_key}"
+fi

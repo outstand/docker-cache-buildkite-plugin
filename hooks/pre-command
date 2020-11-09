@@ -77,5 +77,5 @@ else
   done
 
   rm -f "${filename}"
-  rm -rf cache
+  rm -rf "${cache_dir}"
 fi

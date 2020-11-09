@@ -131,6 +131,14 @@ function cache_restore_skip() {
   echo "🚨 Cache restore is skipped because $1 does not exist"
 }
 
+function cache_save_skip() {
+  echo "Skipping cache save; cache already exists: $1"
+}
+
+function cache_save() {
+  echo ":fire: Saving cache: $1"
+}
+
 function expand_key() {
   CACHE_KEY="$1"
   HASHER_BIN="sha1sum"
