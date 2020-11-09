@@ -63,14 +63,24 @@ if ${no_head:-false}; then
   mkdir -p "${cache_dir}"
 
   for volume in "${volumes[@]}" ; do
-    plugin_prompt_and_must_run docker-compose \
+    cid=$(plugin_prompt_and_must_run docker-compose \
       "${compose_files[@]}" \
       -p "${project_name}" \
       run \
-      --rm \
+      --detach \
       docker-cache-buildkite-plugin \
+      sleep infinity
+    )
+
+    plugin_prompt_and_must_run docker \
+      exec \
+      "${cid}" \
       tar -cf - -C "/volumes/${volume}" . \
       > "cache/${volume}.tar"
+
+    plugin_prompt_and_must_run docker \
+      rm -f "${cid}"
+
   done
 
   volume_tars=()
