@@ -17,6 +17,7 @@ if [[ "$(plugin_read_config DEBUG "false")" =~ ^(true|on|1)$ ]]; then
 fi
 
 if [[ "$(plugin_read_config SAVE "false")" =~ ^(false|off|0)$ ]]; then
+  echo "--- Skipping cache save; save not set"
   exit 0
 fi
 

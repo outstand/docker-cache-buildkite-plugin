@@ -11,7 +11,7 @@ teardown() {
   docker-compose -f tests/fixtures/docker-compose.yml -p buildkite1111 down -v
 }
 
-@test "Correctly expands cache key and skips on cache miss" {
+@test "Restore: Correctly expands cache key and skips on cache miss" {
   export BUILDKITE_JOB_ID=1111
   export BUILDKITE_BUILD_NUMBER=1
   export BUILDKITE_ORGANIZATION_SLUG=slug
@@ -34,7 +34,7 @@ teardown() {
   unstub aws
 }
 
-@test "Uses a volume override file on cache hit" {
+@test "Restore: Uses a volume override file on cache hit" {
   export BUILDKITE_JOB_ID=1111
   export BUILDKITE_BUILD_NUMBER=1
   export BUILDKITE_ORGANIZATION_SLUG=slug
