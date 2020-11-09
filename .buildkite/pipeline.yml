@@ -13,11 +13,12 @@ steps:
         id: docker-cache
 
   - label: ":bash: Tests"
+    command: .buildkite/test.sh
     plugins:
       - ecr#v2.1.1:
           login: true
           region: "us-east-1"
 
       - https://github.com/outstand/docker-compose-buildkite-plugin.git#45517eea7ac209607bf32a26494bb5854c0a743c:
-          run: tests
+          wrap_command: true
           propagate-uid-gid: true
