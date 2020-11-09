@@ -2,4 +2,6 @@
 
 set -euo pipefail
 
-docker pull 786715713882.dkr.ecr.us-east-1.amazonaws.com/bats:latest
+if [[ "${BUILDKITE_PLUGIN_ECR_LOGIN:-}" =~ ^(true|1)$ ]] ; then
+  docker pull 786715713882.dkr.ecr.us-east-1.amazonaws.com/bats:latest
+fi
