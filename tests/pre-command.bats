@@ -9,6 +9,8 @@ load '../lib/shared'
 
 teardown() {
   docker-compose -f tests/fixtures/docker-compose.yml -p buildkite1111 down -v
+  rm -f docker-compose.cache-volumes.buildkite-1-override.yml
+  rm -rf cache
 }
 
 @test "Restore: Correctly expands cache key and skips on cache miss" {

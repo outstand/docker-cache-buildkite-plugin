@@ -69,12 +69,17 @@ if ${no_head:-false}; then
       run \
       --rm \
       docker-cache-buildkite-plugin \
-      tar -cf - -C /volumes/"${volume}" \
+      tar -vcf - -C "/volumes/${volume}" . \
       > "cache/${volume}.tar"
   done
 
-  tar -cf "${filename}" -C "${cache_dir}" "${volumes[@]}"
-  aws s3 cp "cache/${filename}" "s3://${s3_bucket}/${s3_key}"
+  volume_tars=()
+  for volume in "${volumes[@]}"; do
+    volume_tars+=("${volume}.tar")
+  done
+
+  tar -vcf "${filename}" -C "${cache_dir}" "${volume_tars[@]}"
+  aws s3 cp "${filename}" "s3://${s3_bucket}/${s3_key}"
 
   rm -f "${filename}"
   rm -rf "${cache_dir}"
