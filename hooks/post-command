@@ -20,6 +20,10 @@ if [[ "$(plugin_read_config SAVE "false")" =~ ^(false|off|0)$ ]]; then
   echo "--- Skipping cache save; save not set"
   exit 0
 fi
+if [ "${BUILDKITE_COMMAND_EXIT_STATUS:-}" -ne 0 ]; then
+  echo "--- 🚨 Cache is skipped because step returned ${BUILDKITE_COMMAND_EXIT_STATUS}"
+  exit 0
+fi
 
 echo "--- :bank: Saving Docker Cache"
 

@@ -30,6 +30,25 @@ teardown() {
   assert_output --partial "Skipping cache save; save not set"
 }
 
+@test "Save: Skips if step fails" {
+  export BUILDKITE_JOB_ID=1111
+  export BUILDKITE_BUILD_NUMBER=1
+  export BUILDKITE_ORGANIZATION_SLUG=slug
+  export BUILDKITE_PIPELINE_SLUG=pipeline
+  export BUILDKITE_PLUGIN_DOCKER_CACHE_S3_BUCKET=bucket
+  export BUILDKITE_PLUGIN_DOCKER_CACHE_KEYS_0='v1-bundler-cache-{{ arch }}-{{ checksum "tests/fixtures/lockfile" }}'
+  export BUILDKITE_PLUGIN_DOCKER_CACHE_KEYS_1='v1-bundler-cache-{{ arch }}'
+  export BUILDKITE_PLUGIN_DOCKER_CACHE_VOLUMES_0=bundler-data
+  export BUILDKITE_PLUGIN_DOCKER_CACHE_VOLUMES_1=yarn-data
+  export BUILDKITE_PLUGIN_DOCKER_CACHE_SAVE=1
+  export BUILDKITE_COMMAND_EXIT_STATUS=1
+
+  run "$PWD/hooks/post-command"
+
+  assert_success
+  assert_output --partial "Cache is skipped because step returned 1"
+}
+
 @test "Save: Correctly expands cache key and skips on existing cache" {
   export BUILDKITE_JOB_ID=1111
   export BUILDKITE_BUILD_NUMBER=1
