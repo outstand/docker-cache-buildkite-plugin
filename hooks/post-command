@@ -44,6 +44,7 @@ s3_key="${bucket_path}/${keys[0]}.tar"
 filename="${keys[0]}.tar"
 
 aws s3api head-object --bucket "${s3_bucket}" --key "${s3_key}" || no_head=true
+echo
 
 if ${no_head:-false}; then
   cache_save "s3://${s3_bucket}/${s3_key}"
@@ -56,6 +57,7 @@ if ${no_head:-false}; then
   echo "~~~ :docker: Creating docker-compose override file for volumes"
   build_volume_override_file "${volumes[@]}" | tee "$override_file"
 
+  echo "--- :docker: Exporting docker volumes to cache"
   compose_files=()
   while IFS=$' ' read -r file ; do
     [[ -n "${file:-}" ]] && compose_files+=(-f "$file")
@@ -67,6 +69,8 @@ if ${no_head:-false}; then
   mkdir -p "${cache_dir}"
 
   for volume in "${volumes[@]}" ; do
+    echo "Exporting data for ${volume}"
+
     cid=$(plugin_prompt_and_must_run docker-compose \
       "${compose_files[@]}" \
       -p "${project_name}" \

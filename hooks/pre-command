@@ -35,6 +35,7 @@ s3_key="${bucket_path}/${keys[0]}.tar"
 filename="${keys[0]}.tar"
 
 aws s3api head-object --bucket "${s3_bucket}" --key "${s3_key}" || no_head=true
+echo
 
 if ${no_head:-false}; then
   cache_restore_skip "s3://${s3_bucket}/${s3_key}"
