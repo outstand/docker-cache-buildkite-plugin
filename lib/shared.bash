@@ -124,19 +124,19 @@ function build_volume_override_file_with_version() {
 }
 
 function cache_hit() {
-  echo "🔥 Cache hit: $1"
+  echo "--- 🔥 Cache hit: $1"
 }
 
 function cache_restore_skip() {
-  echo "🚨 Cache restore is skipped because $1 does not exist"
+  echo "--- 🚨 Cache restore is skipped because $1 does not exist"
 }
 
 function cache_save_skip() {
-  echo "Skipping cache save; cache already exists: $1"
+  echo "--- Skipping cache save; cache already exists: $1"
 }
 
 function cache_save() {
-  echo ":fire: Saving cache: $1"
+  echo "--- :fire: Saving cache: $1"
 }
 
 function expand_key() {
