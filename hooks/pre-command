@@ -17,7 +17,7 @@ if [[ "$(plugin_read_config DEBUG "false")" =~ ^(true|on|1)$ ]]; then
 fi
 
 if [[ -n "$(plugin_read_config NAME)" ]]; then
-  echo "--- :bank: Restoring Docker Cache: \033[33m$(plugin_read_config NAME)\033[0m"
+  echo -e "--- :bank: Restoring Docker Cache: \033[33m$(plugin_read_config NAME)\033[0m"
 else
   echo "--- :bank: Restoring Docker Cache"
 fi

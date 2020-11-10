@@ -55,7 +55,7 @@ teardown() {
   run "$PWD/hooks/pre-command"
 
   assert_success
-  assert_output --partial "Restoring Docker Cache: \033[33mbundler-cache\033[0m"
+  assert_line --regexp "Restoring Docker Cache: .*bundler-cache.*"
   assert_output --partial "Using cache key: v1-bundler-cache-linux-x86_64-d958fad66a3456aa1f7b9e492063ed3de2baabb0"
   assert_output --partial "Cache restore is skipped"
 

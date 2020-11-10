@@ -26,7 +26,7 @@ if [ "${BUILDKITE_COMMAND_EXIT_STATUS:-}" -ne 0 ]; then
 fi
 
 if [[ -n "$(plugin_read_config NAME)" ]]; then
-  echo "--- :bank: Saving Docker Cache: \033[33m$(plugin_read_config NAME)\033[0m"
+  echo -e "--- :bank: Saving Docker Cache: \033[33m$(plugin_read_config NAME)\033[0m"
 else
   echo "--- :bank: Saving Docker Cache"
 fi
