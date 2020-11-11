@@ -84,6 +84,13 @@ if ${no_head:-false}; then
       sleep infinity
     )
 
+    if [[ "$(plugin_read_config VOLUME_DEBUG "false")" =~ ^(true|on|1)$ ]]; then
+      plugin_prompt_and_run docker \
+        exec \
+        "${cid}" \
+        ls -la "/volumes/${volume}"
+    fi
+
     plugin_prompt_and_must_run docker \
       exec \
       "${cid}" \
