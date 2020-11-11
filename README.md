@@ -2,6 +2,8 @@
 
 A [Buildkite plugin](https://buildkite.com/docs/plugins) that lets you cache the contents of docker volumes.
 
+## :warning: Requires an in-development version of the [docker-compose buildkite plugin](https://github.com/outstand/docker-compose-buildkite-plugin/tree/wrap_command) :warning:
+
 ## Example
 
 docker-compose.yml:
