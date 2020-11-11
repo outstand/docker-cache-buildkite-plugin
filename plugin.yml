@@ -1,5 +1,5 @@
 name: Docker Cache
-description: Cache/Restore the contents of docker volumes
+description: :whale: :bank: Cache/Restore the contents of docker volumes
 author: https://github.com/outstand
 requirements:
   - docker
