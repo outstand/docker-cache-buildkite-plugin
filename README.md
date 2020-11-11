@@ -1,4 +1,4 @@
-# Docker Cache Buildkite Plugin
+# Docker Cache Buildkite Plugin [![Build status](https://badge.buildkite.com/2ae18797187196f761d0615cb585eb0a7b2ae60a5e0199edfa.svg)](https://buildkite.com/outstand/docker-cache-buildkite-plugin)
 
 A [Buildkite plugin](https://buildkite.com/docs/plugins) that lets you cache the contents of docker volumes.
 
