@@ -87,7 +87,7 @@ else
           run \
           --rm \
           docker-cache-buildkite-plugin \
-          ls "/volumes/${volume}"
+          ls -la "/volumes/${volume}"
       fi
     else
       echo "+++ :warning: Missing volume ${volume} for restore!"
