@@ -31,13 +31,15 @@ steps:
           propagate-uid-gid: true
 
   - label: ":hammer: Populate cache"
+    command: .buildkite/integration_test.sh populate
+    key: populate_cache
     plugins:
       - ecr#v2.1.1:
           login: true
           region: "us-east-1"
 
       - https://github.com/outstand/docker-compose-buildkite-plugin.git#${PLUGIN_DOCKER_COMPOSE_VERSION}:
-          run: rails
+          wrap_command: true
           propagate-uid-gid: true
           config:
             - tests/fixtures/docker-compose.yml
@@ -60,6 +62,7 @@ steps:
 
   - label: ":hammer: Use cache"
     command: .buildkite/integration_test.sh
+    depends_on: populate_cache
     plugins:
       - ecr#v2.1.1:
           login: true
