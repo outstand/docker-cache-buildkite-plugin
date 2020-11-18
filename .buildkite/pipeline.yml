@@ -3,7 +3,6 @@ env:
   BUILDKITE_PLUGIN_DOCKER_CACHE_VOLUME_DEBUG: "true"
   BUILDKITE_PLUGIN_DOCKER_COMPOSE_SHELL: "false"
   PLUGIN_DOCKER_COMPOSE_VERSION: "4621e87e1a2bc348acfda29dd569144bd4220adc"
-  PLUGIN_DOCKER_CACHE_VERSION: "4442a78e948bac7a57ed5ef9e7c735b9c330e77c"
 
 steps:
   - label: ":shell: Shellcheck"
@@ -45,7 +44,7 @@ steps:
             - tests/fixtures/docker-compose.yml
             - tests/fixtures/test.yml
 
-      - https://github.com/outstand/docker-cache-buildkite-plugin.git#${PLUGIN_DOCKER_CACHE_VERSION}:
+      - ${BUILDKITE_PULL_REQUEST_REPO:-$BUILDKITE_REPO}#${BUILDKITE_COMMIT}:
           name: bundler-cache
           keys:
             - v1-bundler-cache-{{ arch }}-{{ checksum "Gemfile.lock" }}-${BUILDKITE_COMMIT}
@@ -53,7 +52,7 @@ steps:
           volumes:
             - bundler-data
 
-      - https://github.com/outstand/docker-cache-buildkite-plugin.git#${PLUGIN_DOCKER_CACHE_VERSION}:
+      - ${BUILDKITE_PULL_REQUEST_REPO:-$BUILDKITE_REPO}#${BUILDKITE_COMMIT}:
           name: yarn-cache
           keys:
             - v1-yarn-cache-{{ arch }}-{{ checksum "yarn.lock" }}-${BUILDKITE_COMMIT}
@@ -76,7 +75,7 @@ steps:
             - tests/fixtures/docker-compose.yml
             - tests/fixtures/test.yml
 
-      - https://github.com/outstand/docker-cache-buildkite-plugin.git#${PLUGIN_DOCKER_CACHE_VERSION}:
+      - ${BUILDKITE_PULL_REQUEST_REPO:-$BUILDKITE_REPO}#${BUILDKITE_COMMIT}:
           name: bundler-cache
           keys:
             - v1-bundler-cache-{{ arch }}-{{ checksum "Gemfile.lock" }}-${BUILDKITE_COMMIT}
@@ -84,7 +83,7 @@ steps:
           volumes:
             - bundler-data
 
-      - https://github.com/outstand/docker-cache-buildkite-plugin.git#${PLUGIN_DOCKER_CACHE_VERSION}:
+      - ${BUILDKITE_PULL_REQUEST_REPO:-$BUILDKITE_REPO}#${BUILDKITE_COMMIT}:
           name: yarn-cache
           keys:
             - v1-yarn-cache-{{ arch }}-{{ checksum "yarn.lock" }}-${BUILDKITE_COMMIT}
