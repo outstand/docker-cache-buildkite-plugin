@@ -22,13 +22,10 @@ EOF
 }
 
 @test "Detect compose version" {
-  stub buildkite-agent \
-    "meta-data get docker-compose-config-files : echo tests/fixtures/docker-compose.yml" \
+  export DOCKER_COMPOSE_CONFIG_FILES="tests/fixtures/docker-compose.yml"
 
   run docker_compose_config_version
 
   assert_success
   assert_output "3.3"
-
-  unstub buildkite-agent
 }

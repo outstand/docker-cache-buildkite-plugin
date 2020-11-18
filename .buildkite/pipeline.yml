@@ -19,6 +19,6 @@ steps:
           login: true
           region: "us-east-1"
 
-      - https://github.com/outstand/docker-compose-buildkite-plugin.git#45517eea7ac209607bf32a26494bb5854c0a743c:
+      - https://github.com/outstand/docker-compose-buildkite-plugin.git#4621e87e1a2bc348acfda29dd569144bd4220adc:
           wrap_command: true
           propagate-uid-gid: true

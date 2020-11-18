@@ -86,7 +86,7 @@ function docker_compose_project_name() {
 
 # Returns the version from the output of docker_compose_config
 function docker_compose_config_version() {
-  read -r -a config <<< "$(buildkite-agent meta-data get docker-compose-config-files)"
+  read -r -a config <<< "${DOCKER_COMPOSE_CONFIG_FILES}"
   awk '/^\s*version:/ { print $2; }' < "${config[0]}" | sed "s/[\"']//g"
 }
 

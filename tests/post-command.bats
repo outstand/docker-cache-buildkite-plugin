@@ -112,11 +112,8 @@ teardown() {
   export BUILDKITE_PLUGIN_DOCKER_CACHE_VOLUMES_1=yarn-data
   export BUILDKITE_PLUGIN_DOCKER_CACHE_SAVE=1
 
-  stub buildkite-agent \
-    "meta-data get docker-compose-config-files : echo tests/fixtures/docker-compose.yml" \
-    "meta-data get docker-compose-config-files : echo tests/fixtures/docker-compose.yml" \
-    "meta-data get docker-compose-config-files : echo tests/fixtures/docker-compose.yml" \
-    "meta-data get docker-compose-project-name : echo buildkite1111"
+  export DOCKER_COMPOSE_CONFIG_FILES="tests/fixtures/docker-compose.yml"
+  export DOCKER_COMPOSE_PROJECT_NAME="buildkite1111"
 
   stub aws \
     "s3api head-object --bucket bucket --key slug/pipeline/v1-bundler-cache-linux-x86_64-d958fad66a3456aa1f7b9e492063ed3de2baabb0.tar : exit 1" \
@@ -150,5 +147,4 @@ teardown() {
   assert_output --partial "Saving cache"
 
   unstub aws
-  unstub buildkite-agent
 }

@@ -65,10 +65,10 @@ if ${no_head:-false}; then
   compose_files=()
   while IFS=$' ' read -r file ; do
     [[ -n "${file:-}" ]] && compose_files+=(-f "$file")
-  done <<< "$(buildkite-agent meta-data get docker-compose-config-files)"
+  done <<< "${DOCKER_COMPOSE_CONFIG_FILES:-}"
   compose_files+=(-f "${override_file}")
 
-  project_name="$(buildkite-agent meta-data get docker-compose-project-name)"
+  project_name="${DOCKER_COMPOSE_PROJECT_NAME}"
 
   mkdir -p "${cache_dir}"
 
