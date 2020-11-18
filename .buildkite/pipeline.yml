@@ -1,3 +1,10 @@
+env:
+  BUILDKITE_PLUGIN_DOCKER_CACHE_S3_BUCKET: "outstand-buildkite-cache"
+  BUILDKITE_PLUGIN_DOCKER_CACHE_VOLUME_DEBUG: "true"
+  BUILDKITE_PLUGIN_DOCKER_COMPOSE_SHELL: "false"
+  PLUGIN_DOCKER_COMPOSE_VERSION: "4621e87e1a2bc348acfda29dd569144bd4220adc"
+  PLUGIN_DOCKER_CACHE_VERSION: "4442a78e948bac7a57ed5ef9e7c735b9c330e77c"
+
 steps:
   - label: ":shell: Shellcheck"
     plugins:
@@ -19,6 +26,63 @@ steps:
           login: true
           region: "us-east-1"
 
-      - https://github.com/outstand/docker-compose-buildkite-plugin.git#4621e87e1a2bc348acfda29dd569144bd4220adc:
+      - https://github.com/outstand/docker-compose-buildkite-plugin.git#${PLUGIN_DOCKER_COMPOSE_VERSION}:
           wrap_command: true
           propagate-uid-gid: true
+
+  - label: ":hammer: Populate cache"
+    plugins:
+      - ecr#v2.1.1:
+          login: true
+          region: "us-east-1"
+
+      - https://github.com/outstand/docker-compose-buildkite-plugin.git#${PLUGIN_DOCKER_COMPOSE_VERSION}:
+          run: rails
+          propagate-uid-gid: true
+          config:
+            - tests/fixtures/docker-compose.yml
+
+      - https://github.com/outstand/docker-cache-buildkite-plugin.git#${PLUGIN_DOCKER_CACHE_VERSION}:
+          name: bundler-cache
+          keys:
+            - v1-bundler-cache-{{ arch }}-{{ checksum "Gemfile.lock" }}-${BUILDKITE_COMMIT}
+          save: true
+          volumes:
+            - bundler-data
+
+      - https://github.com/outstand/docker-cache-buildkite-plugin.git#${PLUGIN_DOCKER_CACHE_VERSION}:
+          name: yarn-cache
+          keys:
+            - v1-yarn-cache-{{ arch }}-{{ checksum "yarn.lock" }}-${BUILDKITE_COMMIT}
+          save: true
+          volumes:
+            - yarn-data
+
+  - label: ":hammer: Use cache"
+    command: .buildkite/integration_test.sh
+    plugins:
+      - ecr#v2.1.1:
+          login: true
+          region: "us-east-1"
+
+      - https://github.com/outstand/docker-compose-buildkite-plugin.git#${PLUGIN_DOCKER_COMPOSE_VERSION}:
+          wrap_command: true
+          propagate-uid-gid: true
+          config:
+            - tests/fixtures/docker-compose.yml
+
+      - https://github.com/outstand/docker-cache-buildkite-plugin.git#${PLUGIN_DOCKER_CACHE_VERSION}:
+          name: bundler-cache
+          keys:
+            - v1-bundler-cache-{{ arch }}-{{ checksum "Gemfile.lock" }}-${BUILDKITE_COMMIT}
+            - v1-bundler-cache-{{ arch }}-
+          volumes:
+            - bundler-data
+
+      - https://github.com/outstand/docker-cache-buildkite-plugin.git#${PLUGIN_DOCKER_CACHE_VERSION}:
+          name: yarn-cache
+          keys:
+            - v1-yarn-cache-{{ arch }}-{{ checksum "yarn.lock" }}-${BUILDKITE_COMMIT}
+            - v1-yarn-cache-{{ arch }}-
+          volumes:
+            - yarn-data

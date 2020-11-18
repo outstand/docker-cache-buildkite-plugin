@@ -1,7 +1,7 @@
 version: "3.3"
 services:
-  foo:
-    image: alpine:latest
+  rails:
+    build: .
     volumes:
       - bundler-data:/usr/local/bundler
       - yarn-data:/srv/yarn
