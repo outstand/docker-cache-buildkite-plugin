@@ -13,7 +13,7 @@ fi
 
 compose_params+=(-p "${BUILDKITE_PLUGIN_DOCKER_COMPOSE_PROJECT_NAME}")
 
-if [[ "$1" = "populate" ]]; then
+if [[ "${1:-}" = "populate" ]]; then
   echo "--- Populate cache"
 
   number=$RANDOM
