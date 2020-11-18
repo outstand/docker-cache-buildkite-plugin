@@ -59,10 +59,13 @@ else
   build_volume_override_file "${volumes[@]}" | tee "$override_file"
 
   echo "--- :docker: Extracting cache into docker volumes"
+
   compose_files=()
-  while IFS=' ' read -r file ; do
+  IFS=' ' read -r -a config_files <<< "${DOCKER_COMPOSE_CONFIG_FILES:-}"
+
+  for file in "${config_files[@]}"; do
     [[ -n "${file:-}" ]] && compose_files+=(-f "$file")
-  done <<< "${DOCKER_COMPOSE_CONFIG_FILES:-}"
+  done
   compose_files+=(-f "${override_file}")
 
   project_name="${DOCKER_COMPOSE_PROJECT_NAME}"

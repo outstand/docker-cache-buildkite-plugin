@@ -3,9 +3,11 @@
 set -euo pipefail
 
 compose_params=()
-while IFS=' ' read -r file ; do
+IFS=' ' read -r -a config_files <<< "${DOCKER_COMPOSE_CONFIG_FILES:-}"
+
+for file in "${config_files[@]}"; do
   [[ -n "${file:-}" ]] && compose_params+=(-f "$file")
-done <<< "${DOCKER_COMPOSE_CONFIG_FILES:-}"
+done
 
 if [[ -n "${BUILDKITE_PLUGIN_DOCKER_COMPOSE_OVERRIDE_FILE:-}" ]] ; then
   compose_params+=(-f "${BUILDKITE_PLUGIN_DOCKER_COMPOSE_OVERRIDE_FILE}")
