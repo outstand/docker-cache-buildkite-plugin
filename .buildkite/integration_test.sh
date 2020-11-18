@@ -3,7 +3,7 @@
 set -euo pipefail
 
 compose_params=()
-while IFS=$' ' read -r file ; do
+while IFS=' ' read -r file ; do
   [[ -n "${file:-}" ]] && compose_params+=(-f "$file")
 done <<< "${DOCKER_COMPOSE_CONFIG_FILES:-}"
 
