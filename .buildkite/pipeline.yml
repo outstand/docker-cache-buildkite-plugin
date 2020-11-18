@@ -43,6 +43,7 @@ steps:
           propagate-uid-gid: true
           config:
             - tests/fixtures/docker-compose.yml
+            - tests/fixtures/test.yml
 
       - https://github.com/outstand/docker-cache-buildkite-plugin.git#${PLUGIN_DOCKER_CACHE_VERSION}:
           name: bundler-cache
@@ -73,6 +74,7 @@ steps:
           propagate-uid-gid: true
           config:
             - tests/fixtures/docker-compose.yml
+            - tests/fixtures/test.yml
 
       - https://github.com/outstand/docker-cache-buildkite-plugin.git#${PLUGIN_DOCKER_CACHE_VERSION}:
           name: bundler-cache
