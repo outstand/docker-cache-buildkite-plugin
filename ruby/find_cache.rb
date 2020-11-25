@@ -38,8 +38,12 @@ class FindCache
       end
     end
 
-    # Find last path segment and remove file extension
-    context.resolved_key = resolved_key.split('/').last.split('.').first
+    if resolved_key.nil?
+      context.resolved_key = nil
+    else
+      # Find last path segment and remove file extension
+      context.resolved_key = resolved_key.split('/').last.split('.').first
+    end
   end
 
   private
