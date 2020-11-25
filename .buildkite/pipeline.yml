@@ -29,6 +29,18 @@ steps:
           wrap_command: true
           propagate-uid-gid: true
 
+  - label: ":ruby: Tests"
+    command: rspec
+    plugins:
+      - ecr#v2.1.1:
+          login: true
+          region: "us-east-1"
+
+      - https://github.com/outstand/docker-compose-buildkite-plugin.git#${PLUGIN_DOCKER_COMPOSE_VERSION}:
+          run: find-cache
+          propagate-uid-gid: true
+          config: ruby/docker-compose.yml
+
   - label: ":hammer: Populate cache"
     command: .buildkite/integration_test.sh populate
     key: populate_cache
