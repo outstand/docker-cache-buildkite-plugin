@@ -17,7 +17,7 @@ function find_cache() {
   if [[ $? != 0 ]]; then
     >&2 echo "docker build failed:"
     >&2 echo "${output}"
-    exit 1
+    exit 2
   fi
 
   docker \

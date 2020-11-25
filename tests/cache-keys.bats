@@ -13,6 +13,16 @@ load '../lib/cache-keys'
   assert_output "v1-bundler-cache-linux-x86_64-da39a3ee5e6b4b0d3255bfef95601890afd80709-9cf9e79ffe0d01c9e3d6a143ac63a9c9ecc8015b"
 }
 
+@test "Cache keys: exit 1 when no key is found" {
+  bucket=outstand-buildkite-cache
+  prefix=outstand/docker-cache-buildkite-plugin/fixtures
+
+  run find_cache "$bucket" "$prefix" "do-not-find-me"
+
+  assert_failure 1
+  assert_output ''
+}
+
 @test "Cache keys: Reports on failure" {
   bucket=outstand-buildkite-cache
   prefix=outstand/docker-cache-buildkite-plugin/fixtures
@@ -22,9 +32,11 @@ load '../lib/cache-keys'
 
   run find_cache "$bucket" "$prefix" "v1-bundler-cache-"
 
-  assert_failure
+  assert_failure 2
   assert_output <<OUTPUT
 docker build failed:
 FAILURE
 OUTPUT
+
+  unstub docker
 }

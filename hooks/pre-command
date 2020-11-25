@@ -7,6 +7,12 @@ BASEDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && cd .. && pwd)"
 # shellcheck source=lib/shared.bash
 . "$BASEDIR/lib/shared.bash"
 
+if [[ -z "${BATS_PATH}" ]]; then
+  # Only source this when not under test. Otherwise it stomps on our stubs.
+  # shellcheck source=lib/cache-keys.bash
+  . "$BASEDIR/lib/cache-keys.bash"
+fi
+
 expand_headers_on_error() {
   echo "^^^ +++"
 }
@@ -33,70 +39,79 @@ while IFS=$'\n' read -r key ; do
   [[ -n "${key:-}" ]] && keys+=("$(expand_key "$key")")
 done <<< "$(plugin_read_list KEYS)"
 
-echo "Using cache key: ${keys[0]}"
 
-s3_key="${bucket_path}/${keys[0]}.tar"
-filename="${keys[0]}.tar"
+set +e
+set -x
+resolved_key=$(find_cache "${s3_bucket}" "${bucket_path}" "${keys[@]}")
+find_cache_result=$?
+if [[ $find_cache_result == 2 ]]; then
+  echo "find_cache failed:"
+  echo "${resolved_key}"
+  exit 2
+elif [[ $find_cache_result == 1 ]]; then
+  # No resolved key found
+  cache_restore_skip "s3://${s3_bucket}/${bucket_path}/${keys[0]}"
+  exit 0
+fi
+set -e
 
-aws s3api head-object --bucket "${s3_bucket}" --key "${s3_key}" || no_head=true
-echo
+echo "Using cache key: ${resolved_key}"
 
-if ${no_head:-false}; then
-  cache_restore_skip "s3://${s3_bucket}/${s3_key}"
-else
-  cache_hit "s3://${s3_bucket}/${s3_key}"
-  aws s3 cp "s3://${s3_bucket}/${s3_key}" .
+s3_key="${bucket_path}/${resolved_key}.tar"
+filename="${resolved_key}.tar"
 
-  mkdir -p "${cache_dir}"
-  tar -xf "${filename}" -C "${cache_dir}"
+cache_hit "s3://${s3_bucket}/${s3_key}"
+aws s3 cp "s3://${s3_bucket}/${s3_key}" .
 
-  while IFS=$'\n' read -r volume ; do
-    [[ -n "${volume:-}" ]] && volumes+=("$volume")
-  done <<< "$(plugin_read_list VOLUMES)"
+mkdir -p "${cache_dir}"
+tar -xf "${filename}" -C "${cache_dir}"
 
-  test -f "$override_file" && rm "$override_file"
-  echo "--- :docker: Creating docker-compose override file for volumes"
-  build_volume_override_file "${volumes[@]}" | tee "$override_file"
+while IFS=$'\n' read -r volume ; do
+  [[ -n "${volume:-}" ]] && volumes+=("$volume")
+done <<< "$(plugin_read_list VOLUMES)"
 
-  echo "--- :docker: Extracting cache into docker volumes"
+test -f "$override_file" && rm "$override_file"
+echo "--- :docker: Creating docker-compose override file for volumes"
+build_volume_override_file "${volumes[@]}" | tee "$override_file"
 
-  compose_files=()
-  IFS=' ' read -r -a config_files <<< "${DOCKER_COMPOSE_CONFIG_FILES:-}"
+echo "--- :docker: Extracting cache into docker volumes"
 
-  for file in "${config_files[@]}"; do
-    [[ -n "${file:-}" ]] && compose_files+=(-f "$file")
-  done
-  compose_files+=(-f "${override_file}")
+compose_files=()
+IFS=' ' read -r -a config_files <<< "${DOCKER_COMPOSE_CONFIG_FILES:-}"
 
-  project_name="${DOCKER_COMPOSE_PROJECT_NAME}"
+for file in "${config_files[@]}"; do
+  [[ -n "${file:-}" ]] && compose_files+=(-f "$file")
+done
+compose_files+=(-f "${override_file}")
 
-  for volume in "${volumes[@]}" ; do
-    if [[ -f "cache/${volume}.tar" ]] ; then
-      echo "Extracting data for ${volume}"
+project_name="${DOCKER_COMPOSE_PROJECT_NAME}"
 
-      plugin_prompt_and_must_run docker-compose \
+for volume in "${volumes[@]}" ; do
+  if [[ -f "cache/${volume}.tar" ]] ; then
+    echo "Extracting data for ${volume}"
+
+    plugin_prompt_and_must_run docker-compose \
+      "${compose_files[@]}" \
+      -p "${project_name}" \
+      run \
+      --rm \
+      docker-cache-buildkite-plugin \
+      tar -xf - -C /volumes/"${volume}" --strip-components=1 \
+      < "cache/${volume}.tar"
+
+    if [[ "$(plugin_read_config VOLUME_DEBUG "false")" =~ ^(true|on|1)$ ]]; then
+      plugin_prompt_and_run docker-compose \
         "${compose_files[@]}" \
         -p "${project_name}" \
         run \
         --rm \
         docker-cache-buildkite-plugin \
-        tar -xf - -C /volumes/"${volume}" --strip-components=1 \
-        < "cache/${volume}.tar"
-
-      if [[ "$(plugin_read_config VOLUME_DEBUG "false")" =~ ^(true|on|1)$ ]]; then
-        plugin_prompt_and_run docker-compose \
-          "${compose_files[@]}" \
-          -p "${project_name}" \
-          run \
-          --rm \
-          docker-cache-buildkite-plugin \
-          ls -la "/volumes/${volume}"
-      fi
-    else
-      echo "+++ :warning: Missing volume ${volume} for restore!"
+        ls -la "/volumes/${volume}"
     fi
-  done
+  else
+    echo "+++ :warning: Missing volume ${volume} for restore!"
+  fi
+done
 
-  rm -f "${filename}"
-  rm -rf "${cache_dir}"
-fi
+rm -f "${filename}"
+rm -rf "${cache_dir}"
