@@ -6,3 +6,6 @@ services:
       - .:/srv
       # - ~/.aws:/home/ci/.aws
       # - ~/.awsvault:/home/ci/.awsvault
+    environment:
+      AWS_CONTAINER_CREDENTIALS_RELATIVE_URI:
+      CI:
