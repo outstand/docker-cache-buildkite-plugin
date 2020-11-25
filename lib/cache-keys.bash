@@ -29,6 +29,7 @@ function find_cache() {
     -e AWS_SESSION_TOKEN="${AWS_SESSION_TOKEN:-}" \
     -e AWS_SECURITY_TOKEN="${AWS_SECURITY_TOKEN:-}" \
     -e AWS_SESSION_EXPIRATION="${AWS_SESSION_EXPIRATION:-}" \
+    -e AWS_CONTAINER_CREDENTIALS_RELATIVE_URI="${AWS_CONTAINER_CREDENTIALS_RELATIVE_URI}" \
     docker-cache-buildkite-plugin:find-cache \
     ruby -I . cli.rb \
     "$bucket" "$prefix" "${keys[@]}"

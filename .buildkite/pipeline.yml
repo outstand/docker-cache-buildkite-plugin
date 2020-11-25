@@ -55,6 +55,8 @@ steps:
           config:
             - tests/fixtures/docker-compose.yml
             - tests/fixtures/test.yml
+          env:
+            - AWS_CONTAINER_CREDENTIALS_RELATIVE_URI
 
       - ${BUILDKITE_PULL_REQUEST_REPO:-$BUILDKITE_REPO}#${BUILDKITE_COMMIT}:
           name: bundler-cache
@@ -86,6 +88,8 @@ steps:
           config:
             - tests/fixtures/docker-compose.yml
             - tests/fixtures/test.yml
+          env:
+            - AWS_CONTAINER_CREDENTIALS_RELATIVE_URI
 
       - ${BUILDKITE_PULL_REQUEST_REPO:-$BUILDKITE_REPO}#${BUILDKITE_COMMIT}:
           name: bundler-cache
