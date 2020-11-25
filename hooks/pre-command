@@ -7,7 +7,7 @@ BASEDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && cd .. && pwd)"
 # shellcheck source=lib/shared.bash
 . "$BASEDIR/lib/shared.bash"
 
-if [[ -z "${BATS_PATH}" ]]; then
+if [[ -z "${BATS_PATH:-}" ]]; then
   # Only source this when not under test. Otherwise it stomps on our stubs.
   # shellcheck source=lib/cache-keys.bash
   . "$BASEDIR/lib/cache-keys.bash"
