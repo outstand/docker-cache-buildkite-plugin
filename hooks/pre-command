@@ -41,7 +41,6 @@ done <<< "$(plugin_read_list KEYS)"
 
 
 set +e
-set -x
 resolved_key=$(find_cache "${s3_bucket}" "${bucket_path}" "${keys[@]}")
 find_cache_result=$?
 if [[ $find_cache_result == 2 ]]; then
