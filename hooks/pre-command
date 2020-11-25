@@ -49,7 +49,7 @@ if [[ $find_cache_result == 2 ]]; then
   exit 2
 elif [[ $find_cache_result == 1 ]]; then
   # No resolved key found
-  cache_restore_skip "s3://${s3_bucket}/${bucket_path}/${keys[0]}"
+  cache_restore_skip "s3://${s3_bucket}/${bucket_path}/${keys[0]}.tar"
   exit 0
 fi
 set -e
