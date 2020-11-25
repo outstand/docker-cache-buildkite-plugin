@@ -32,7 +32,7 @@ teardown() {
 
   assert_success
   assert_output --partial "Restoring Docker Cache"
-  assert_output --partial "Cache restore is skipped because s3://bucket/slug/pipeline/v1-bundler-cache-linux-x86_64-d958fad66a3456aa1f7b9e492063ed3de2baabb0 does not exist"
+  assert_output --partial "Cache restore is skipped because s3://bucket/slug/pipeline/v1-bundler-cache-linux-x86_64-d958fad66a3456aa1f7b9e492063ed3de2baabb0.tar does not exist"
 
   unstub find_cache
 }
@@ -56,7 +56,7 @@ teardown() {
 
   assert_success
   assert_line --regexp "Restoring Docker Cache: .*bundler-cache.*"
-  assert_output --partial "Cache restore is skipped because s3://bucket/slug/pipeline/v1-bundler-cache-linux-x86_64-d958fad66a3456aa1f7b9e492063ed3de2baabb0 does not exist"
+  assert_output --partial "Cache restore is skipped because s3://bucket/slug/pipeline/v1-bundler-cache-linux-x86_64-d958fad66a3456aa1f7b9e492063ed3de2baabb0.tar does not exist"
 
   unstub find_cache
 }
