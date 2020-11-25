@@ -1,2 +1,3 @@
 cache
 docker-compose.cache-volumes.buildkite-1-override.yml
+ruby/spec/examples.txt
