@@ -5,3 +5,6 @@ services:
     volumes:
       - ".:/plugin"
       - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      AWS_CONTAINER_CREDENTIALS_RELATIVE_URI:
+      CI:

@@ -29,6 +29,18 @@ steps:
           wrap_command: true
           propagate-uid-gid: true
 
+  - label: ":ruby: Tests"
+    command: rspec
+    plugins:
+      - ecr#v2.1.1:
+          login: true
+          region: "us-east-1"
+
+      - https://github.com/outstand/docker-compose-buildkite-plugin.git#${PLUGIN_DOCKER_COMPOSE_VERSION}:
+          run: find-cache
+          propagate-uid-gid: true
+          config: ruby/docker-compose.yml
+
   - label: ":hammer: Populate cache"
     command: .buildkite/integration_test.sh populate
     key: populate_cache
@@ -43,11 +55,13 @@ steps:
           config:
             - tests/fixtures/docker-compose.yml
             - tests/fixtures/test.yml
+          env:
+            - AWS_CONTAINER_CREDENTIALS_RELATIVE_URI
 
       - ${BUILDKITE_PULL_REQUEST_REPO:-$BUILDKITE_REPO}#${BUILDKITE_COMMIT}:
           name: bundler-cache
           keys:
-            - v1-bundler-cache-{{ arch }}-{{ checksum "Gemfile.lock" }}-${BUILDKITE_COMMIT}
+            - v1-bundler-cache-{{ arch }}-{{ checksum "tests/fixtures/Gemfile.lock" }}-${BUILDKITE_COMMIT}
           save: true
           volumes:
             - bundler-data
@@ -55,7 +69,7 @@ steps:
       - ${BUILDKITE_PULL_REQUEST_REPO:-$BUILDKITE_REPO}#${BUILDKITE_COMMIT}:
           name: yarn-cache
           keys:
-            - v1-yarn-cache-{{ arch }}-{{ checksum "yarn.lock" }}-${BUILDKITE_COMMIT}
+            - v1-yarn-cache-{{ arch }}-{{ checksum "tests/fixtures/yarn.lock" }}-${BUILDKITE_COMMIT}
           save: true
           volumes:
             - yarn-data
@@ -74,11 +88,13 @@ steps:
           config:
             - tests/fixtures/docker-compose.yml
             - tests/fixtures/test.yml
+          env:
+            - AWS_CONTAINER_CREDENTIALS_RELATIVE_URI
 
       - ${BUILDKITE_PULL_REQUEST_REPO:-$BUILDKITE_REPO}#${BUILDKITE_COMMIT}:
           name: bundler-cache
           keys:
-            - v1-bundler-cache-{{ arch }}-{{ checksum "Gemfile.lock" }}-${BUILDKITE_COMMIT}
+            - v1-bundler-cache-{{ arch }}-{{ checksum "tests/fixtures/Gemfile.lock" }}-${BUILDKITE_COMMIT}
             - v1-bundler-cache-{{ arch }}-
           volumes:
             - bundler-data
@@ -86,7 +102,7 @@ steps:
       - ${BUILDKITE_PULL_REQUEST_REPO:-$BUILDKITE_REPO}#${BUILDKITE_COMMIT}:
           name: yarn-cache
           keys:
-            - v1-yarn-cache-{{ arch }}-{{ checksum "yarn.lock" }}-${BUILDKITE_COMMIT}
+            - v1-yarn-cache-{{ arch }}-{{ checksum "tests/fixtures/yarn.lock" }}-${BUILDKITE_COMMIT}
             - v1-yarn-cache-{{ arch }}-
           volumes:
             - yarn-data

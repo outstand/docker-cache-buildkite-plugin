@@ -6,6 +6,7 @@ load '../lib/shared'
 # export BUILDKITE_AGENT_STUB_DEBUG=/dev/stdout
 # export AWS_STUB_DEBUG=/dev/stdout
 # export BATS_MOCK_TMPDIR=$PWD
+# export FIND_CACHE_STUB_DEBUG=/dev/stdout
 
 teardown() {
   docker-compose -f tests/fixtures/docker-compose.yml -p buildkite1111 down -v
@@ -20,21 +21,20 @@ teardown() {
   export BUILDKITE_PIPELINE_SLUG=pipeline
   export BUILDKITE_PLUGIN_DOCKER_CACHE_S3_BUCKET=bucket
   export BUILDKITE_PLUGIN_DOCKER_CACHE_KEYS_0='v1-bundler-cache-{{ arch }}-{{ checksum "tests/fixtures/lockfile" }}'
-  export BUILDKITE_PLUGIN_DOCKER_CACHE_KEYS_1='v1-bundler-cache-{{ arch }}'
+  export BUILDKITE_PLUGIN_DOCKER_CACHE_KEYS_1='v1-bundler-cache-{{ arch }}-'
   export BUILDKITE_PLUGIN_DOCKER_CACHE_VOLUMES_0=bundler-data
   export BUILDKITE_PLUGIN_DOCKER_CACHE_VOLUMES_1=yarn-data
 
-  stub aws \
-    "s3api head-object --bucket bucket --key slug/pipeline/v1-bundler-cache-linux-x86_64-d958fad66a3456aa1f7b9e492063ed3de2baabb0.tar : exit 1"
+  stub find_cache \
+    "bucket slug/pipeline v1-bundler-cache-linux-x86_64-d958fad66a3456aa1f7b9e492063ed3de2baabb0 v1-bundler-cache-linux-x86_64- : exit 1"
 
   run "$PWD/hooks/pre-command"
 
   assert_success
   assert_output --partial "Restoring Docker Cache"
-  assert_output --partial "Using cache key: v1-bundler-cache-linux-x86_64-d958fad66a3456aa1f7b9e492063ed3de2baabb0"
-  assert_output --partial "Cache restore is skipped"
+  assert_output --partial "Cache restore is skipped because s3://bucket/slug/pipeline/v1-bundler-cache-linux-x86_64-d958fad66a3456aa1f7b9e492063ed3de2baabb0.tar does not exist"
 
-  unstub aws
+  unstub find_cache
 }
 
 @test "Restore: Uses name if set" {
@@ -45,21 +45,20 @@ teardown() {
   export BUILDKITE_PLUGIN_DOCKER_CACHE_NAME=bundler-cache
   export BUILDKITE_PLUGIN_DOCKER_CACHE_S3_BUCKET=bucket
   export BUILDKITE_PLUGIN_DOCKER_CACHE_KEYS_0='v1-bundler-cache-{{ arch }}-{{ checksum "tests/fixtures/lockfile" }}'
-  export BUILDKITE_PLUGIN_DOCKER_CACHE_KEYS_1='v1-bundler-cache-{{ arch }}'
+  export BUILDKITE_PLUGIN_DOCKER_CACHE_KEYS_1='v1-bundler-cache-{{ arch }}-'
   export BUILDKITE_PLUGIN_DOCKER_CACHE_VOLUMES_0=bundler-data
   export BUILDKITE_PLUGIN_DOCKER_CACHE_VOLUMES_1=yarn-data
 
-  stub aws \
-    "s3api head-object --bucket bucket --key slug/pipeline/v1-bundler-cache-linux-x86_64-d958fad66a3456aa1f7b9e492063ed3de2baabb0.tar : exit 1"
+  stub find_cache \
+    "bucket slug/pipeline v1-bundler-cache-linux-x86_64-d958fad66a3456aa1f7b9e492063ed3de2baabb0 v1-bundler-cache-linux-x86_64- : exit 1"
 
   run "$PWD/hooks/pre-command"
 
   assert_success
   assert_line --regexp "Restoring Docker Cache: .*bundler-cache.*"
-  assert_output --partial "Using cache key: v1-bundler-cache-linux-x86_64-d958fad66a3456aa1f7b9e492063ed3de2baabb0"
-  assert_output --partial "Cache restore is skipped"
+  assert_output --partial "Cache restore is skipped because s3://bucket/slug/pipeline/v1-bundler-cache-linux-x86_64-d958fad66a3456aa1f7b9e492063ed3de2baabb0.tar does not exist"
 
-  unstub aws
+  unstub find_cache
 }
 
 @test "Restore: Uses a volume override file on cache hit" {
@@ -69,15 +68,17 @@ teardown() {
   export BUILDKITE_PIPELINE_SLUG=pipeline
   export BUILDKITE_PLUGIN_DOCKER_CACHE_S3_BUCKET=bucket
   export BUILDKITE_PLUGIN_DOCKER_CACHE_KEYS_0='v1-bundler-cache-{{ arch }}-{{ checksum "tests/fixtures/lockfile" }}'
-  export BUILDKITE_PLUGIN_DOCKER_CACHE_KEYS_1='v1-bundler-cache-{{ arch }}'
+  export BUILDKITE_PLUGIN_DOCKER_CACHE_KEYS_1='v1-bundler-cache-{{ arch }}-'
   export BUILDKITE_PLUGIN_DOCKER_CACHE_VOLUMES_0=bundler-data
   export BUILDKITE_PLUGIN_DOCKER_CACHE_VOLUMES_1=yarn-data
 
   export DOCKER_COMPOSE_CONFIG_FILES="tests/fixtures/docker-compose.yml"
   export DOCKER_COMPOSE_PROJECT_NAME="buildkite1111"
 
+  stub find_cache \
+    "bucket slug/pipeline v1-bundler-cache-linux-x86_64-d958fad66a3456aa1f7b9e492063ed3de2baabb0 v1-bundler-cache-linux-x86_64- : echo v1-bundler-cache-linux-x86_64-d958fad66a3456aa1f7b9e492063ed3de2baabb0; exit 0"
+
   stub aws \
-    "s3api head-object --bucket bucket --key slug/pipeline/v1-bundler-cache-linux-x86_64-d958fad66a3456aa1f7b9e492063ed3de2baabb0.tar : exit 0" \
     "s3 cp s3://bucket/slug/pipeline/v1-bundler-cache-linux-x86_64-d958fad66a3456aa1f7b9e492063ed3de2baabb0.tar . : cp tests/fixtures/cache.tar ./v1-bundler-cache-linux-x86_64-d958fad66a3456aa1f7b9e492063ed3de2baabb0.tar; echo Copied from S3"
 
   run "$PWD/hooks/pre-command"
@@ -87,6 +88,7 @@ teardown() {
   assert_output --partial "Copied from S3"
 
   unstub aws
+  unstub find_cache
 
   run docker-compose \
     -f tests/fixtures/docker-compose.yml \

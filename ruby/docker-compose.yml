@@ -1,0 +1,11 @@
+version: "3.8"
+services:
+  find-cache:
+    build: .
+    volumes:
+      - .:/srv
+      # - ~/.aws:/home/ci/.aws
+      # - ~/.awsvault:/home/ci/.awsvault
+    environment:
+      AWS_CONTAINER_CREDENTIALS_RELATIVE_URI:
+      CI:
