@@ -162,5 +162,6 @@ function expand_key() {
     CACHE_KEY="${BASH_REMATCH[1]}${EXPANDED_VALUE}${BASH_REMATCH[3]}"
   done
 
+  CACHE_KEY=${CACHE_KEY//\//-}
   echo "$CACHE_KEY"
 }
