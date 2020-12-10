@@ -18,18 +18,23 @@ function find_cache() {
     exit 2
   fi
 
+  env_vars=()
+  env_vars+=("-e" "AWS_VAULT=${AWS_VAULT:-}")
+  env_vars+=("-e" "AWS_REGION=${AWS_REGION:-}")
+  env_vars+=("-e" "AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-}")
+  env_vars+=("-e" "AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-}")
+  env_vars+=("-e" "AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN:-}")
+  env_vars+=("-e" "AWS_SECURITY_TOKEN=${AWS_SECURITY_TOKEN:-}")
+  env_vars+=("-e" "AWS_SESSION_EXPIRATION=${AWS_SESSION_EXPIRATION:-}")
+  if [[ -n "${AWS_CONTAINER_CREDENTIALS_RELATIVE_URI:-}" ]]; then
+    env_vars+=("-e" "AWS_CONTAINER_CREDENTIALS_RELATIVE_URI=${AWS_CONTAINER_CREDENTIALS_RELATIVE_URI}")
+  fi
+
   docker \
     --log-level "error" \
     run \
     --rm \
-    -e AWS_VAULT="${AWS_VAULT:-}" \
-    -e AWS_REGION="${AWS_REGION:-}" \
-    -e AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID:-}" \
-    -e AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY:-}" \
-    -e AWS_SESSION_TOKEN="${AWS_SESSION_TOKEN:-}" \
-    -e AWS_SECURITY_TOKEN="${AWS_SECURITY_TOKEN:-}" \
-    -e AWS_SESSION_EXPIRATION="${AWS_SESSION_EXPIRATION:-}" \
-    -e AWS_CONTAINER_CREDENTIALS_RELATIVE_URI="${AWS_CONTAINER_CREDENTIALS_RELATIVE_URI}" \
+    "${env_vars[@]}" \
     docker-cache-buildkite-plugin:find-cache \
     ruby -I . cli.rb \
     "$bucket" "$prefix" "${keys[@]}"
