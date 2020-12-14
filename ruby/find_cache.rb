@@ -36,6 +36,8 @@ class FindCache
           resolved_time = object.last_modified
         end
       end
+
+      break if resolved_key != nil
     end
 
     if resolved_key.nil?
