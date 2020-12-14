@@ -5,7 +5,7 @@ load '../lib/shared'
 load '../lib/cache-keys'
 
 @test "Cache keys: Find key based on prefix" {
-  bucket=outstand-buildkite-cache
+  bucket=outstand-buildkite-data
   prefix=outstand/docker-cache-buildkite-plugin/fixtures
   run find_cache "$bucket" "$prefix" "v1-bundler-cache-"
 
@@ -14,7 +14,7 @@ load '../lib/cache-keys'
 }
 
 @test "Cache keys: exit 1 when no key is found" {
-  bucket=outstand-buildkite-cache
+  bucket=outstand-buildkite-data
   prefix=outstand/docker-cache-buildkite-plugin/fixtures
 
   run find_cache "$bucket" "$prefix" "do-not-find-me"
@@ -24,7 +24,7 @@ load '../lib/cache-keys'
 }
 
 @test "Cache keys: Reports on failure" {
-  bucket=outstand-buildkite-cache
+  bucket=outstand-buildkite-data
   prefix=outstand/docker-cache-buildkite-plugin/fixtures
 
   stub docker \
