@@ -42,7 +42,7 @@ while IFS=$'\n' read -r key ; do
   [[ -n "${key:-}" ]] && keys+=("$(expand_key "$key")")
 done <<< "$(plugin_read_list KEYS)"
 
-echo "Read keys: ${keys[@]}"
+echo "Read keys: ${keys[*]}"
 echo "Using cache key: ${keys[0]}"
 
 s3_key="${bucket_path}/${keys[0]}.tar"

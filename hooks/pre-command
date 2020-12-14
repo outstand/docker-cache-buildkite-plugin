@@ -39,7 +39,7 @@ while IFS=$'\n' read -r key ; do
   [[ -n "${key:-}" ]] && keys+=("$(expand_key "$key")")
 done <<< "$(plugin_read_list KEYS)"
 
-echo "Read keys: ${keys[@]}"
+echo "Read keys: ${keys[*]}"
 
 set +e
 resolved_key=$(find_cache "${s3_bucket}" "${bucket_path}" "${keys[@]}")
