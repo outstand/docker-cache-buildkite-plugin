@@ -1,7 +1,7 @@
 require 'find_cache'
 
 RSpec.describe FindCache do
-  let(:bucket) { 'outstand-buildkite-cache' }
+  let(:bucket) { 'outstand-buildkite-data' }
   let(:prefix) { 'outstand/docker-cache-buildkite-plugin/fixtures' }
 
   it 'fetches the most specific cache key' do
@@ -47,5 +47,21 @@ RSpec.describe FindCache do
 
     expect(result).to be_success
     expect(result.resolved_key).to be_nil
+  end
+
+  it 'respects key order' do
+    keys = [
+      'v1-bundler-cache-linux-x86_64-branch-name-',
+      'v1-bundler-cache-linux-x86_64-'
+    ]
+
+    result = FindCache.call(
+      keys: keys,
+      bucket: bucket,
+      prefix: prefix
+    )
+
+    expect(result).to be_success
+    expect(result.resolved_key).to eq 'v1-bundler-cache-linux-x86_64-branch-name-deadbeef'
   end
 end
