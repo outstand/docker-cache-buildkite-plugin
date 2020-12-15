@@ -64,4 +64,20 @@ RSpec.describe FindCache do
     expect(result).to be_success
     expect(result.resolved_key).to eq 'v1-bundler-cache-linux-x86_64-branch-name-deadbeef'
   end
+
+  it 'preserves dots in the key name' do
+    keys = [
+      'v1-bundler-cache-linux-x86_64-longer-branch-name-1.2.3'
+    ]
+
+    result = FindCache.call(
+      keys: keys,
+      bucket: bucket,
+      prefix: prefix
+    )
+
+    expect(result).to be_success
+    expect(result.resolved_key).to eq 'v1-bundler-cache-linux-x86_64-longer-branch-name-1.2.3'
+
+  end
 end
