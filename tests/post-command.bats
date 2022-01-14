@@ -149,7 +149,7 @@ teardown() {
   # Populate docker volumes
   build_volume_override_file bundler-data yarn-data | tee docker-compose.cache-volumes.buildkite-1-override.yml
 
-  docker-compose \
+  docker compose \
     -f tests/fixtures/docker-compose.yml \
     -f docker-compose.cache-volumes.buildkite-1-override.yml \
     -p buildkite1111 \
@@ -158,7 +158,7 @@ teardown() {
     docker-cache-buildkite-plugin \
     sh -c "echo bundler > /volumes/bundler-data/bundler.txt"
 
-  docker-compose \
+  docker compose \
     -f tests/fixtures/docker-compose.yml \
     -f docker-compose.cache-volumes.buildkite-1-override.yml \
     -p buildkite1111 \

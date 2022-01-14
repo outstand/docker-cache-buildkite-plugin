@@ -9,7 +9,7 @@ load '../lib/shared'
 # export FIND_CACHE_STUB_DEBUG=/dev/stdout
 
 teardown() {
-  docker-compose -f tests/fixtures/docker-compose.yml -p buildkite1111 down -v
+  docker compose -f tests/fixtures/docker-compose.yml -p buildkite1111 down -v
   rm -f docker-compose.cache-volumes.buildkite-1-override.yml
   rm -rf cache
 }
@@ -114,7 +114,7 @@ teardown() {
   unstub aws
   unstub find_cache
 
-  run docker-compose \
+  run docker compose \
     -f tests/fixtures/docker-compose.yml \
     -f docker-compose.cache-volumes.buildkite-1-override.yml \
     -p buildkite1111 \
@@ -125,7 +125,7 @@ teardown() {
 
   assert_output --partial bundler.txt
 
-  run docker-compose \
+  run docker compose \
     -f tests/fixtures/docker-compose.yml \
     -f docker-compose.cache-volumes.buildkite-1-override.yml \
     -p buildkite1111 \

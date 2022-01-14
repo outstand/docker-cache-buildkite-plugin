@@ -79,7 +79,7 @@ if ${no_head:-false}; then
   for volume in "${volumes[@]}" ; do
     echo "Exporting data for ${volume}"
 
-    cid=$(plugin_prompt_and_must_run docker-compose \
+    cid=$(plugin_prompt_and_must_run docker compose \
       "${compose_files[@]}" \
       -p "${project_name}" \
       run \

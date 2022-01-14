@@ -90,17 +90,18 @@ for volume in "${volumes[@]}" ; do
   if [[ -f "cache/${volume}.tar" ]] ; then
     echo "Extracting data for ${volume}"
 
-    plugin_prompt_and_must_run docker-compose \
+    plugin_prompt_and_must_run docker compose \
       "${compose_files[@]}" \
       -p "${project_name}" \
       run \
       --rm \
+      -T \
       docker-cache-buildkite-plugin \
       tar -xf - -C /volumes/"${volume}" --strip-components=1 \
       < "cache/${volume}.tar"
 
     if [[ "$(plugin_read_config VOLUME_DEBUG "false")" =~ ^(true|on|1)$ ]]; then
-      plugin_prompt_and_run docker-compose \
+      plugin_prompt_and_run docker compose \
         "${compose_files[@]}" \
         -p "${project_name}" \
         run \
