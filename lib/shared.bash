@@ -84,22 +84,17 @@ function docker_compose_project_name() {
   echo "buildkite${BUILDKITE_JOB_ID//-}"
 }
 
-# Build an docker compose file that overrides the image for a
-# set of [ service, image, cache_from ] tuples
-function build_image_override_file() {
+# Build an docker compose file that overrides the config for a
+# list of volumes
+function build_volume_override_file() {
   printf "services:\\n"
+  printf "  docker-cache-buildkite-plugin:\\n"
+  printf "    image: alpine:latest\\n"
+  printf "    volumes:\\n"
 
   while test ${#} -gt 0 ; do
-    printf "  %s:\\n" "$1"
-    printf "    image: %s\\n" "$2"
-
-    if [[ -n "$3" ]] ; then
-      printf "    build:\\n"
-      printf "      cache_from:\\n"
-      printf "        - %s\\n" "$3"
-    fi
-
-    shift 3
+    printf "      - %s:/volumes/%s\\n" "$1" "$1"
+    shift
   done
 }
 
