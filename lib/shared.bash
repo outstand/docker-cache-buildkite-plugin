@@ -80,46 +80,26 @@ function plugin_read_list_into_result() {
 
 # Returns the name of the docker compose project for this build
 function docker_compose_project_name() {
-  # No dashes or underscores because docker-compose will remove them anyways
+  # No dashes or underscores because docker compose will remove them anyways
   echo "buildkite${BUILDKITE_JOB_ID//-}"
 }
 
-# Returns the version from the output of docker_compose_config
-function docker_compose_config_version() {
-  read -r -a config <<< "${DOCKER_COMPOSE_CONFIG_FILES}"
-  awk '/^\s*version:/ { print $2; }' < "${config[0]}" | sed "s/[\"']//g"
-}
-
-# Build an docker-compose file that overrides the image for a set of
-# service and image pairs
-function build_volume_override_file() {
-  build_volume_override_file_with_version \
-    "$(docker_compose_config_version)" "$@"
-}
-
-# Build an docker-compose file that overrides the image for a specific
-# docker-compose version and a list of volumes
-function build_volume_override_file_with_version() {
-  local version="$1"
-
-  if [[ -z "$version" ]]; then
-    echo "The 'build' option can only be used with Compose file versions 2.0 and above."
-    echo "For more information on Docker Compose configuration file versions, see:"
-    echo "https://docs.docker.com/compose/compose-file/compose-versioning/#versioning"
-    exit 1
-  fi
-
-  printf "version: '%s'\\n" "$version"
-  shift
-
+# Build an docker compose file that overrides the image for a
+# set of [ service, image, cache_from ] tuples
+function build_image_override_file() {
   printf "services:\\n"
-  printf "  docker-cache-buildkite-plugin:\\n"
-  printf "    image: alpine:latest\\n"
-  printf "    volumes:\\n"
 
   while test ${#} -gt 0 ; do
-    printf "      - %s:/volumes/%s\\n" "$1" "$1"
-    shift
+    printf "  %s:\\n" "$1"
+    printf "    image: %s\\n" "$2"
+
+    if [[ -n "$3" ]] ; then
+      printf "    build:\\n"
+      printf "      cache_from:\\n"
+      printf "        - %s\\n" "$3"
+    fi
+
+    shift 3
   done
 }
 

@@ -8,7 +8,7 @@ load '../lib/shared'
 # export BATS_MOCK_TMPDIR=$PWD
 
 teardown() {
-  docker-compose -f tests/fixtures/docker-compose.yml -p buildkite1111 down -v
+  docker compose -f tests/fixtures/docker-compose.yml -p buildkite1111 down -v
   rm -f docker-compose.cache-volumes.buildkite-1-override.yml
   rm -rf cache
 }
